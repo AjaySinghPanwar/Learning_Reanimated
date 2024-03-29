@@ -42,7 +42,8 @@ const NotificationsList = ({
       }
     },
     onEndDrag: event => {
-      if (event.contentOffset.y < 0) {
+      console.log(event.contentOffset.y);
+      if (event.contentOffset.y <= 0) {
         listVisibility.value = withTiming(0);
       }
     },
