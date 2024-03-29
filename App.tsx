@@ -11,6 +11,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   interpolate,
+  useDerivedValue,
 } from 'react-native-reanimated';
 import SwipeUpToOpen from './src/components/SwipeUpToOpen';
 
@@ -26,6 +27,9 @@ const ListHeaderComponent = ({date}: {date: Dayjs}) => (
 const App = () => {
   const [date, setDate] = useState<Dayjs>(dayjs());
   const footerVisibility = useSharedValue(1);
+  const footerHeight = useDerivedValue(() =>
+    interpolate(footerVisibility.value, [0, 1], [0, 85]),
+  );
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -47,7 +51,9 @@ const App = () => {
 
       {/* Notification list */}
       <NotificationsList
+        contentContainerStyle={{paddingBottom: 50}}
         footerVisibility={footerVisibility}
+        footerHeight={footerHeight}
         ListHeaderComponent={<ListHeaderComponent date={date} />}
       />
 
@@ -78,8 +84,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    alignItems: 'center',
     height: 250,
+    paddingTop: 50,
+    alignItems: 'center',
     justifyContent: 'center',
   },
 
