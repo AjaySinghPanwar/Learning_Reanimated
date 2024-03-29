@@ -5,18 +5,27 @@ import IonIcons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import NotificationsList from './src/components/Notification/NotificationList';
 import dayjs, {Dayjs} from 'dayjs';
+import Animated, {
+  SlideInDown,
+  SlideInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  interpolate,
+} from 'react-native-reanimated';
+import SwipeUpToOpen from './src/components/SwipeUpToOpen';
 
 /* Header Component*/
 const ListHeaderComponent = ({date}: {date: Dayjs}) => (
-  <View style={styles.header}>
+  <Animated.View style={styles.header} entering={SlideInUp}>
     <IonIcons name="lock-closed" size={20} color="white" />
     <Text style={styles.date}>{date.format('dddd, DD MMMM')}</Text>
     <Text style={styles.time}>{date.format('hh:mm')}</Text>
-  </View>
+  </Animated.View>
 );
 
 const App = () => {
   const [date, setDate] = useState<Dayjs>(dayjs());
+  const footerVisibility = useSharedValue(1);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -26,25 +35,36 @@ const App = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // For animated footer style
+  const animatedFooterStyle = useAnimatedStyle(() => ({
+    marginTop: interpolate(footerVisibility.value, [0, 1], [-85, 0]),
+    opacity: footerVisibility.value,
+  }));
+
   return (
     <ImageBackground source={Images.wallpaper_icon} style={styles.container}>
       <StatusBar barStyle={'default'} />
 
       {/* Notification list */}
       <NotificationsList
+        footerVisibility={footerVisibility}
         ListHeaderComponent={<ListHeaderComponent date={date} />}
       />
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <Animated.View
+        style={[styles.footer, animatedFooterStyle]}
+        entering={SlideInDown}>
         <View style={styles.icon}>
           <MaterialCommunityIcons name="flashlight" size={24} color="white" />
         </View>
 
+        <SwipeUpToOpen />
+
         <View style={styles.icon}>
           <IonIcons name="camera" size={24} color="white" />
         </View>
-      </View>
+      </Animated.View>
     </ImageBackground>
   );
 };
@@ -80,9 +100,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 'auto',
+    marginBottom: 10,
     paddingVertical: 10,
     paddingHorizontal: 30,
-    height: 100,
+    height: 75,
   },
 
   icon: {
